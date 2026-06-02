@@ -1,0 +1,458 @@
+/* ────────────────────────────────────────────
+   Settings — Panel de configuración
+   Precios editables, tarifas, restaurar defaults.
+   ──────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════
+   Layout de secciones
+   ════════════════════════════════════════════ */
+
+.settings-section {
+  margin-bottom: var(--space-6);
+}
+
+.settings-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-section__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ════════════════════════════════════════════
+   Tarjetas de yeso editables
+   ════════════════════════════════════════════ */
+
+.settings-yeso-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.settings-yeso-card {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.settings-yeso-card:hover {
+  border-color: var(--color-terracota-light);
+}
+
+.settings-yeso-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.settings-yeso-card__name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.settings-yeso-card__price-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-terracota);
+  background: rgba(198, 123, 92, 0.08);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.settings-yeso-card__field {
+  margin-bottom: var(--space-2);
+}
+
+.settings-yeso-card__field:last-child {
+  margin-bottom: 0;
+}
+
+.settings-yeso-card__label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.settings-yeso-card__input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.settings-yeso-card__input:focus {
+  border-color: var(--border-focus);
+  outline: none;
+}
+
+.settings-yeso-card__hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ─── Nuevo yeso (tarjeta de agregar) ─── */
+
+.settings-yeso-card--add {
+  border-style: dashed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 160px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.settings-yeso-card--add:hover {
+  border-color: var(--color-terracota);
+  color: var(--color-terracota);
+  background: rgba(198, 123, 92, 0.04);
+}
+
+.settings-yeso-card--add__icon {
+  width: 32px;
+  height: 32px;
+}
+
+.settings-yeso-card--add__label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ════════════════════════════════════════════
+   Tabla de costos por tamaño
+   ════════════════════════════════════════════ */
+
+.settings-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.settings-table__head {
+  background: var(--bg-surface-alt);
+}
+
+.settings-table__head th {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-table__head th:last-child {
+  text-align: right;
+}
+
+.settings-table__body td {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.settings-table__body tr:last-child td {
+  border-bottom: none;
+}
+
+.settings-table__body td:last-child {
+  text-align: right;
+}
+
+.settings-table__input {
+  width: 100%;
+  max-width: 100px;
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  text-align: right;
+  transition: border-color var(--transition-fast);
+}
+
+.settings-table__input:focus {
+  border-color: var(--border-focus);
+  outline: none;
+}
+
+.settings-table__size-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+/* ════════════════════════════════════════════
+   Tarifas de zona
+   ════════════════════════════════════════════ */
+
+.settings-zona-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+}
+
+.settings-zona-row:last-child {
+  margin-bottom: 0;
+}
+
+.settings-zona-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-zona-row__name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.settings-zona-row__hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.settings-zona-row__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.settings-zona-row__input {
+  width: 80px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  text-align: right;
+  transition: border-color var(--transition-fast);
+}
+
+.settings-zona-row__input:focus {
+  border-color: var(--border-focus);
+  outline: none;
+}
+
+.settings-zona-row__unit {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ════════════════════════════════════════════
+   Configuración de velas
+   ════════════════════════════════════════════ */
+
+.settings-vela-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.settings-vela-field {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.settings-vela-field__label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+  display: block;
+}
+
+.settings-vela-field__input {
+  width: 100%;
+  padding: var(--space-1) 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.settings-vela-field__input:focus {
+  border-bottom-color: var(--border-focus);
+  outline: none;
+}
+
+.settings-vela-field__unit {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ════════════════════════════════════════════
+   Botones de acción en settings
+   ════════════════════════════════════════════ */
+
+.settings-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color);
+}
+
+.settings-actions .btn {
+  flex: 1;
+}
+
+/* ════════════════════════════════════════════
+   Modal para nuevo yeso
+   ════════════════════════════════════════════ */
+
+.settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 21, 18, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.settings-modal {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.settings-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-modal__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.settings-modal__close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--bg-surface-alt);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast),
+              color var(--transition-fast);
+}
+
+.settings-modal__close:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.settings-modal__body {
+  padding: var(--space-4) var(--space-5);
+}
+
+.settings-modal__footer {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border-color);
+}
+
+.settings-modal__footer .btn {
+  flex: 1;
+}
+
+/* ════════════════════════════════════════════
+   Responsive
+   ════════════════════════════════════════════ */
+
+@media (max-width: 600px) {
+  .settings-yeso-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-vela-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .settings-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 400px) {
+  .settings-vela-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-table__head th,
+  .settings-table__body td {
+    padding: var(--space-2);
+  }
+}
