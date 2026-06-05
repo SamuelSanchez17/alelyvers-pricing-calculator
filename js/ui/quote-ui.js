@@ -449,7 +449,13 @@ export function mountQuote() {
   }
 
   clear(container);
-  quoteItems = []; // Reset al montar
+
+  const preload = store.getState().quotePreload;
+  quoteItems = Array.isArray(preload) ? preload.map((item) => ({ ...item, subtotal: item.subtotal ?? item.precioUnitario * item.cantidad })) : [];
+
+  if (preload) {
+    store.setState({ quotePreload: null });
+  }
 
   container.appendChild(el('h2', { className: 'section-title' }, 'Cotizacion'));
   container.appendChild(el('p', { className: 'section-subtitle' },

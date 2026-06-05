@@ -14,6 +14,7 @@ import { mountCandles } from './ui/candles-ui.js';
 import { mountSettings } from './ui/settings-ui.js';
 import { mountCombo } from './ui/combo-ui.js';
 import { mountQuote } from './ui/quote-ui.js';
+import { mountHistory } from './ui/history-ui.js';
 import { showPanel } from './ui/renderer.js';
 
 // ─── Datos iniciales: merge de defaults + localStorage ───
@@ -171,32 +172,46 @@ function mountPanel(panelId) {
       mountedCleanups.set('quote', cleanup);
       break;
     }
+    case 'history': {
+      const cleanup = mountHistory();
+      mountedCleanups.set('history', cleanup);
+      break;
+    }
   }
 }
 
 function navigateTo(panelId) {
+  if (!panelId) return;
+
+  // 1. Mostrar el panel solicitado
   showPanel(panelId);
+
+  // 2. Montar el panel si no está montado
   mountPanel(panelId);
 
-  const tabExists = document.querySelector(`.nav-tab[data-panel="${panelId}"]`);
-  document.querySelectorAll('.nav-tab').forEach((tab) => {
-    const active = tab.dataset.panel === panelId;
-    tab.classList.toggle('nav-tab--active', active);
+  // 3. Actualizar tabs de navegación ANTES de cualquier otra cosa
+  const allTabs = document.querySelectorAll('.nav-tab');
+  allTabs.forEach((tab) => {
+    const isTarget = tab.dataset.panel === panelId;
+    if (isTarget) {
+      tab.classList.add('nav-tab--active');
+    } else {
+      tab.classList.remove('nav-tab--active');
+    }
   });
 
-  // Si no hay tab para este panel (ej. settings), quitar activo de todos
-  if (!tabExists) {
-    document.querySelectorAll('.nav-tab').forEach((t) => t.classList.remove('nav-tab--active'));
-  }
-
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // 4. Actualizar estado global al final
   store.setState({ activePanel: panelId });
 }
 
 // ─── Eventos de navegación ───
 
 document.querySelectorAll('.nav-tab').forEach((tab) => {
-  tab.addEventListener('click', () => {
+  tab.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     navigateTo(tab.dataset.panel);
   });
 });
@@ -230,7 +245,7 @@ navigateTo(startPanel);
 // mostrar un estado placeholder para que no se vea vacío
   if (!mountedCleanups.has(startPanel)) {
     const panel = document.getElementById(startPanel);
-    if (panel && !['calculator', 'catalog', 'candles', 'settings', 'combos', 'quote'].includes(startPanel)) {
+    if (panel && !['calculator', 'catalog', 'candles', 'settings', 'combos', 'quote', 'history'].includes(startPanel)) {
       panel.innerHTML = `
         <h2 class="section-title">En desarrollo</h2>
         <p class="section-subtitle">Esta sección estará disponible próximamente.</p>
@@ -269,4 +284,4 @@ if (ok) {
   console.log('%cMotor de cálculo difiere del documento', 'color: #D4A34A;');
 }
 
-export { store };
+export { store, navigateTo };
