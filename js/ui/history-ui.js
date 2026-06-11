@@ -10,6 +10,7 @@ import { store, navigateTo } from '../app.js';
 import * as storage from '../storage.js';
 import { downloadHistoryCSV, generateQuoteText, copyToClipboard } from '../utils/export.js';
 import { formatMXN, formatMXNShort, formatDate, capitalize, formatPercent } from '../utils/format.js';
+import { debounce } from '../utils/debounce.js';
 import { el, clear, qs, qsAll, on, delegate } from './renderer.js';
 import {
   iconHistory,
@@ -93,10 +94,12 @@ function renderFilterBar() {
     value: filterText,
   });
 
-  on(searchInput, 'input', () => {
-    filterText = searchInput.value;
+  const handleSearch = debounce((q) => {
+    filterText = q;
     refreshList();
-  });
+  }, 200);
+
+  on(searchInput, 'input', () => handleSearch(searchInput.value));
 
   const searchField = el('div', { className: 'history-filters__search' },
     el('span', { className: 'history-filters__search-icon' }, iconSearch({ size: 16, stroke: 1.75 })),

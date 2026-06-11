@@ -7,6 +7,7 @@
 import { store } from '../app.js';
 import { COSTOS_COLOR, COSTOS_SELLADOR, COSTOS_DETALLE_FINO } from '../catalog.js';
 import { formatGramos, formatMinutos, capitalize } from '../utils/format.js';
+import { debounce } from '../utils/debounce.js';
 import { saveCatalog } from '../storage.js';
 import { el, clear, qs, on, delegate } from './renderer.js';
 import {
@@ -61,10 +62,12 @@ function renderSearchBar() {
 
   const count = el('span', { className: 'catalog-search__count', id: 'catalog-count' });
 
-  on(input, 'input', () => {
-    searchQuery = input.value;
+  const handleSearch = debounce((q) => {
+    searchQuery = q;
     renderGrid();
-  });
+  }, 200);
+
+  on(input, 'input', () => handleSearch(input.value));
 
   return el('div', { className: 'catalog-search' }, icon, input, count);
 }

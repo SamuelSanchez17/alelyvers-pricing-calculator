@@ -9,6 +9,7 @@ import { store } from '../app.js';
 import { calcularCosto, calcularPrecioFinal } from '../calculator.js';
 import { CATALOGO_CERAS, COSTO_FIJO_POR_PIEZA, MARGENES_CANAL } from '../catalog.js';
 import { formatMXN, formatMXNShort, formatGramos, formatMinutos, capitalize } from '../utils/format.js';
+import { debounce } from '../utils/debounce.js';
 import { addToHistory } from '../storage.js';
 import { el, clear, qs, on } from './renderer.js';
 import {
@@ -151,11 +152,13 @@ function renderSearch() {
   const icon = el('span', { className: 'combo-search__icon' });
   icon.appendChild(iconSearch({ size: 14 }));
 
-  on(input, 'input', () => {
-    availableSearch = input.value;
+  const handleSearch = debounce((q) => {
+    availableSearch = q;
     const list = qs('.combo-available__list');
     if (list) renderAvailableList(list);
-  });
+  }, 200);
+
+  on(input, 'input', () => handleSearch(input.value));
 
   return el('div', { className: 'combo-search' }, icon, input);
 }

@@ -9,6 +9,7 @@ import { store } from '../app.js';
 import { calcularVelaCompleta } from '../calculator.js';
 import { CATALOGO_CERAS, CONFIG_VELAS } from '../catalog.js';
 import { formatMXN, formatMXNShort, formatGramos, formatMinutos, formatPercent } from '../utils/format.js';
+import { debounce } from '../utils/debounce.js';
 import { addToHistory } from '../storage.js';
 import { el, clear, qs, on, delegate } from './renderer.js';
 import {
@@ -80,7 +81,9 @@ function renderFigureSelector() {
     dropdown.classList.add('candle-figure-selector__dropdown--open');
   }
 
-  on(input, 'input', () => filterFigures(input.value));
+  const filterFiguresDebounced = debounce((q) => filterFigures(q), 150);
+
+  on(input, 'input', () => filterFiguresDebounced(input.value));
   on(input, 'focus', () => { if (input.value) filterFigures(input.value); });
 
   on(document, 'click', (e) => {
