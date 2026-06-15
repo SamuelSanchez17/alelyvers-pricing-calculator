@@ -1,8 +1,17 @@
 /* ────────────────────────────────────────────
    Footer — Barra de navegación inferior
-   5 tabs: Calcular · Catálogo · Combos · Velas · Historial
+   6 tabs: Calcular · Catálogo · Combos · Velas · Cotizar · Historial
    Fixed bottom, safe-area aware, active state
    ──────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════
+   App footer container
+   ════════════════════════════════════════════ */
+
+.app-footer {
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -2px 12px rgba(26, 26, 26, 0.04);
+}
 
 /* ════════════════════════════════════════════
    Nav tabs
@@ -26,13 +35,15 @@
   gap: 2px;
   padding: var(--space-1) var(--space-1);
   min-width: 44px;
-  color: rgba(245, 240, 235, 0.55);
+  color: var(--text-muted);
   cursor: pointer;
   border-radius: var(--radius-md);
   transition: color var(--transition-fast),
               background var(--transition-fast),
               transform var(--transition-fast);
   position: relative;
+  background: transparent;
+  border: none;
 }
 
 @media (max-width: 360px) {
@@ -47,7 +58,7 @@
 }
 
 .nav-tab:hover {
-  color: rgba(245, 240, 235, 0.8);
+  color: var(--text-secondary);
 }
 
 .nav-tab:active {
@@ -55,20 +66,20 @@
 }
 
 .nav-tab--active {
-  color: var(--color-blanco);
+  color: var(--color-acento-dark);
 }
 
-/* Indicador activo: línea superior sutil */
+/* Indicador activo: pill superior con color de marca */
 .nav-tab--active::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 16px;
+  width: 24px;
   height: 3px;
   border-radius: 0 0 var(--radius-full) var(--radius-full);
-  background: var(--color-dorado);
+  background: var(--color-acento);
   transition: width var(--transition-fast), background var(--transition-theme);
 }
 
@@ -84,6 +95,7 @@
   text-transform: uppercase;
   letter-spacing: 0.4px;
   line-height: 1;
+  color: inherit;
 }
 
 /* ════════════════════════════════════════════

@@ -12,18 +12,14 @@
 }
 
 .header-logo {
-  width: 32px;
-  height: 32px;
+  height: 60px;
+  width: auto;
+  max-height: 60px;
   border-radius: var(--radius-sm);
-  background: var(--color-terracota);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-blanco);
-  font-family: var(--font-heading);
-  font-size: var(--text-lg);
-  font-weight: var(--font-weight-bold);
   flex-shrink: 0;
+  background: var(--color-blanco);
+  padding: 3px;
+  filter: drop-shadow(0 2px 6px rgba(26, 26, 26, 0.12));
 }
 
 .header-title {
@@ -58,7 +54,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: var(--text-lg);
   background: transparent;
   border: none;

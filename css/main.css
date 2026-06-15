@@ -162,30 +162,30 @@ body {
 }
 
 .badge--chica {
-  background: #E6F0E4;
-  color: var(--color-salvia-dark);
+  background: var(--color-azul-light);
+  color: var(--color-azul-dark);
 }
 
 .badge--mediana {
-  background: #F5ECD7;
-  color: var(--color-dorado-dark);
+  background: var(--color-amarillo-light);
+  color: #B89538;
 }
 
 .badge--grande {
-  background: #F2DFD7;
-  color: var(--color-terracota-dark);
+  background: var(--color-rosado-light);
+  color: var(--color-acento-dark);
 }
 
 [data-theme="dark"] .badge--chica {
-  background: #2A3D28;
+  background: #1F3540;
 }
 
 [data-theme="dark"] .badge--mediana {
-  background: #3D3422;
+  background: #3D3520;
 }
 
 [data-theme="dark"] .badge--grande {
-  background: #3D2420;
+  background: #3D2030;
 }
 
 /* ─── Utilidades: Botones ─── */
@@ -310,7 +310,7 @@ body {
 .form-input:focus,
 .form-select:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(198, 123, 92, 0.15);
+  box-shadow: 0 0 0 3px rgba(224, 139, 160, 0.18);
   outline: none;
 }
 
