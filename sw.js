@@ -5,8 +5,8 @@
 // Funciona offline tras la primera carga.
 // ────────────────────────────────────────────
 
-const CACHE_NAME = 'alelyvers-pwa-v1';
-const CACHE_VERSION = 1;
+const CACHE_NAME = 'alelyvers-pwa-v2';
+const CACHE_VERSION = 2;
 
 const PRECACHE_URLS = [
   '/',
