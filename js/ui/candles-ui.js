@@ -300,6 +300,99 @@ function renderToggles() {
   );
 }
 
+function renderMaterialesAdicionales() {
+  const settings = store.getState().settings;
+  const mat = settings.materialesVela || {};
+
+  // Pabilos
+  const pabiloField = el('div', { className: 'form-group' },
+    el('label', { className: 'form-label', htmlFor: 'candle-cantidad-pabilos' }, 'Pabilos gruesos'),
+    el('input', {
+      className: 'form-input',
+      type: 'number',
+      id: 'candle-cantidad-pabilos',
+      min: '0',
+      step: '1',
+      value: '0',
+      placeholder: '0',
+    }),
+    el('span', { className: 'candle-materials__hint' },
+      `${formatMXN(mat.pabilo?.precioPorUnidad || 0)} / pieza`
+    )
+  );
+
+  // Esencia
+  const esenciaField = el('div', { className: 'form-group' },
+    el('label', { className: 'form-label', htmlFor: 'candle-gramos-esencia' }, 'Esencia aromática (g)'),
+    el('input', {
+      className: 'form-input',
+      type: 'number',
+      id: 'candle-gramos-esencia',
+      min: '0',
+      step: '0.1',
+      value: '0',
+      placeholder: '0',
+    }),
+    el('span', { className: 'candle-materials__hint' },
+      `${formatMXN(mat.esencia?.precioPorGramo || 0)} / g`
+    )
+  );
+
+  // Tipo de cera adicional
+  const ceraTypes = [
+    { value: '', label: 'Ninguna' },
+    { value: 'soya-alto', label: mat.ceraSoyaAlto?.nombre || 'Cera soya (alto punto)' },
+    { value: 'soya-bajo', label: mat.ceraSoyaBajo?.nombre || 'Cera soya (bajo punto)' },
+    { value: 'parafina', label: mat.parafina?.nombre || 'Parafina' },
+    { value: 'mezcla', label: 'Mezcla (70% alto + 30% parafina)' },
+  ];
+
+  const ceraOptions = ceraTypes.map((t) =>
+    el('option', { value: t.value }, t.label)
+  );
+
+  const ceraSelect = el('select', { className: 'form-select', id: 'candle-tipo-cera-extra' }, ...ceraOptions);
+
+  const ceraTypeField = el('div', { className: 'form-group' },
+    el('label', { className: 'form-label', htmlFor: 'candle-tipo-cera-extra' }, 'Tipo de cera adicional'),
+    ceraSelect
+  );
+
+  // Gramos de cera adicional
+  const ceraGramosField = el('div', { className: 'form-group' },
+    el('label', { className: 'form-label', htmlFor: 'candle-gramos-cera-extra' }, 'Gramos de cera adicional'),
+    el('input', {
+      className: 'form-input',
+      type: 'number',
+      id: 'candle-gramos-cera-extra',
+      min: '0',
+      step: '0.1',
+      value: '0',
+      placeholder: '0',
+    }),
+    el('span', { className: 'candle-materials__hint' }, 'Se habilita al seleccionar un tipo de cera')
+  );
+
+  // Toggle: habilitar/deshabilitar gramos según tipo seleccionado
+  on(ceraSelect, 'change', () => {
+    const input = qs('#candle-gramos-cera-extra');
+    if (input) {
+      input.disabled = ceraSelect.value === '';
+      if (ceraSelect.value === '') input.value = '0';
+    }
+  });
+
+  // Inicialmente deshabilitado
+  ceraGramosField.querySelector('input').disabled = true;
+
+  return el('div', { className: 'candle-materials-section' },
+    pabiloField,
+    esenciaField,
+    ceraTypeField,
+    ceraGramosField
+  );
+}
+
 function renderSubmitButton() {
   const btn = el('button', {
     className: 'calc-submit__btn',
@@ -321,6 +414,7 @@ function renderResultPlaceholder() {
 function collectParams() {
   const settings = store.getState().settings;
   const v = settings.velas || CONFIG_VELAS;
+  const mat = settings.materialesVela || {};
 
   const pesoCeraG = Number(qs('#candle-peso-cera')?.value) || 0;
   const pesoAromaG = Number(qs('#candle-peso-aroma')?.value) || 0;
@@ -331,6 +425,11 @@ function collectParams() {
   const conColor = qs('#candle-color')?.checked ?? true;
   const conPabilo = qs('#candle-pabilo')?.checked ?? true;
   const conDecorado = qs('#candle-decorado')?.checked ?? false;
+
+  const cantidadPabilos = Number(qs('#candle-cantidad-pabilos')?.value) || 0;
+  const gramosEsencia = Number(qs('#candle-gramos-esencia')?.value) || 0;
+  const tipoCeraExtra = qs('#candle-tipo-cera-extra')?.value || null;
+  const gramosCeraExtra = Number(qs('#candle-gramos-cera-extra')?.value) || 0;
 
   const tarifaPorMinuto = settings.tarifasZona[zonaKey] || 1.16;
   const margen = settings.margenesCanal[canalKey] || 0.45;
@@ -352,6 +451,11 @@ function collectParams() {
     nombre: figureName,
     canal: canalKey,
     zona: zonaKey,
+    tipoCeraExtra,
+    gramosCeraExtra,
+    cantidadPabilos,
+    gramosEsencia,
+    materialesVela: mat,
   };
 }
 
@@ -419,6 +523,17 @@ function handleCalculate() {
   if (result.desglose.costoPabilo > 0) items.push(['Pabilo', result.desglose.costoPabilo]);
   items.push(['Costos fijos', result.desglose.costosFijos]);
   items.push(['Mano de obra', result.desglose.manoDeObra]);
+
+  if (result.desglose.cantidadPabilos > 0) {
+    items.push([`Pabilos extra (×${result.desglose.cantidadPabilos})`, result.desglose.costoPabiloExtra]);
+  }
+  if (result.desglose.gramosEsencia > 0) {
+    items.push([`Esencia (${result.desglose.gramosEsencia}g)`, result.desglose.costoEsencia]);
+  }
+  if (result.desglose.costoCeraExtra > 0 && result.desglose.etiquetaCeraExtra) {
+    items.push([`${result.desglose.etiquetaCeraExtra} (${result.desglose.gramosCeraExtra}g)`, result.desglose.costoCeraExtra]);
+  }
+
   if (result.desglose.capas > 1) items.push(['Multiplicador capas', `×${result.desglose.capas}`]);
 
   const breakdownList = el('div', { className: 'result-card__breakdown-list' },
@@ -607,7 +722,17 @@ export function mountCandles() {
     )
   );
 
-  // 7. Botón calcular
+  // 7. Materiales adicionales
+  container.appendChild(
+    el('div', { className: 'candle-section' },
+      el('h3', { className: 'candle-section__title' },
+        iconBeaker({ size: 16 }), ' Materiales adicionales'
+      ),
+      renderMaterialesAdicionales()
+    )
+  );
+
+  // 8. Botón calcular
   container.appendChild(renderSubmitButton());
 
   // 8. Área de resultados
@@ -701,6 +826,24 @@ function iconSparkles(attrs) {
   ['m12 3-1.5 4.5L6 9l4.5 1.5L12 15l1.5-4.5L18 9l-4.5-1.5z',
    'm5 15-1 3-3 1 3 1 1 3 1-3 3-1-3-1-1-3z',
    'm19 10-1 3-3 1 3 1 1 3 1-3 3-1-3-1-1-3z'].forEach((d) => {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    el2.appendChild(path);
+  });
+  return el2;
+}
+
+function iconBeaker(attrs) {
+  const el2 = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  el2.setAttribute('viewBox', '0 0 24 24');
+  el2.setAttribute('width', attrs.size || 20);
+  el2.setAttribute('height', attrs.size || 20);
+  el2.setAttribute('fill', 'none');
+  el2.setAttribute('stroke', 'currentColor');
+  el2.setAttribute('stroke-width', '2');
+  el2.setAttribute('stroke-linecap', 'round');
+  el2.setAttribute('stroke-linejoin', 'round');
+  ['M8 2v7.246M16 2v7.246', 'M4.57 19.43A2 2 0 0 1 3 17.5V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11.5a2 2 0 0 1-1.57 1.93', 'M2 14h20'].forEach((d) => {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
     el2.appendChild(path);

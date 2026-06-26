@@ -336,3 +336,20 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ════════════════════════════════════════════
+   Materiales adicionales (pabilo, esencia, cera)
+   ════════════════════════════════════════════ */
+
+.candle-materials-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.candle-materials__hint {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
