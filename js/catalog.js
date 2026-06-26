@@ -161,6 +161,34 @@ export const DEFAULT_SETTINGS = {
     costoFijo:           5.00,
     extraDecorarMinutos: 5,
   },
+  materialesVela: {
+    pabilo: {
+      nombre: 'Pabilo grueso',
+      precioPorUnidad: 1.00,
+      unidad: 'pieza',
+    },
+    esencia: {
+      nombre: 'Esencia aromática',
+      precioPorGramo: 1.95,
+      unidad: 'g',
+    },
+    ceraSoyaAlto: {
+      nombre: 'Cera de soya (alto punto)',
+      precioPorGramo: 0.26,
+      unidad: 'g',
+    },
+    ceraSoyaBajo: {
+      nombre: 'Cera de soya (bajo punto)',
+      precioPorGramo: 0.26,
+      unidad: 'g',
+    },
+    parafina: {
+      nombre: 'Parafina',
+      precioPorGramo: 0.06,
+      unidad: 'g',
+    },
+    mezclaPorcentajeCera: 0.70,
+  },
 };
 
 // ─── Nombres para humanos de cada canal y urgencia ───
