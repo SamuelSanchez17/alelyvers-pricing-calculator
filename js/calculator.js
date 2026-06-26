@@ -174,6 +174,11 @@ export function calcularPiezaCompleta(params) {
  * @param {boolean} [params.conPabilo=true]— costo fijo $1.00
  * @param {boolean} [params.conDecorado=false] — +5 min extra si lleva decorado
  * @param {Object} [params.config]         — overrides de CONFIG_VELAS
+ * @param {string}  [params.tipoCeraExtra=null] — 'soya-alto' | 'soya-bajo' | 'parafina' | 'mezcla'
+ * @param {number}  [params.gramosCeraExtra=0]  — gramos de cera adicional
+ * @param {number}  [params.cantidadPabilos=0]  — cantidad de pabilos extra
+ * @param {number}  [params.gramosEsencia=0]    — gramos de esencia aromática extra
+ * @param {Object}  [params.materialesVela]     — configuración de materiales de vela (de settings)
  * @returns {{ desglose: Object, costoBase: number }}
  */
 export function calcularVela(params) {
@@ -187,6 +192,11 @@ export function calcularVela(params) {
     conPabilo = true,
     conDecorado = false,
     config = {},
+    tipoCeraExtra = null,
+    gramosCeraExtra = 0,
+    cantidadPabilos = 0,
+    gramosEsencia = 0,
+    materialesVela = {},
   } = params;
 
   const cfg = { ...CONFIG_VELAS, ...config };
@@ -196,6 +206,9 @@ export function calcularVela(params) {
   const safeMinutos = Math.max(0, Number(minutos) || 0);
   const safeTarifa = Math.max(0, Number(tarifaPorMinuto) || 0);
   const safeCapas = Math.max(1, Number(capas) || 1);
+  const safeGramosCeraExtra = Math.max(0, Number(gramosCeraExtra) || 0);
+  const safeCantidadPabilos = Math.max(0, Number(cantidadPabilos) || 0);
+  const safeGramosEsencia = Math.max(0, Number(gramosEsencia) || 0);
 
   const costoCera     = redondear2(safePesoCera * cfg.precioCeraPorGramo);
   const costoAroma    = redondear2(safePesoAroma * cfg.precioAromaPorGramo);
@@ -205,8 +218,36 @@ export function calcularVela(params) {
   const minutosTotal  = safeMinutos + (conDecorado ? cfg.extraDecorarMinutos : 0);
   const manoDeObra    = redondear2(minutosTotal * safeTarifa);
 
+  // Materiales adicionales
+  const costoPabiloExtra = safeCantidadPabilos * (materialesVela.pabilo?.precioPorUnidad || 0);
+
+  const costoEsencia = safeGramosEsencia * (materialesVela.esencia?.precioPorGramo || 0);
+
+  let costoCeraExtra = 0;
+  let etiquetaCeraExtra = '';
+  if (tipoCeraExtra && safeGramosCeraExtra > 0 && Object.keys(materialesVela).length > 0) {
+    if (tipoCeraExtra === 'mezcla') {
+      const pctCera = materialesVela.mezclaPorcentajeCera ?? 0.70;
+      const precioMezcla =
+        (pctCera * (materialesVela.ceraSoyaAlto?.precioPorGramo || 0)) +
+        ((1 - pctCera) * (materialesVela.parafina?.precioPorGramo || 0));
+      costoCeraExtra = safeGramosCeraExtra * precioMezcla;
+      etiquetaCeraExtra = `Mezcla`;
+    } else if (tipoCeraExtra === 'soya-alto') {
+      costoCeraExtra = safeGramosCeraExtra * (materialesVela.ceraSoyaAlto?.precioPorGramo || 0);
+      etiquetaCeraExtra = materialesVela.ceraSoyaAlto?.nombre || 'Cera soya alto';
+    } else if (tipoCeraExtra === 'soya-bajo') {
+      costoCeraExtra = safeGramosCeraExtra * (materialesVela.ceraSoyaBajo?.precioPorGramo || 0);
+      etiquetaCeraExtra = materialesVela.ceraSoyaBajo?.nombre || 'Cera soya bajo';
+    } else if (tipoCeraExtra === 'parafina') {
+      costoCeraExtra = safeGramosCeraExtra * (materialesVela.parafina?.precioPorGramo || 0);
+      etiquetaCeraExtra = materialesVela.parafina?.nombre || 'Parafina';
+    }
+  }
+
   const costoBase = redondear2(
-    (costoCera + costoAroma + costoColor + costoPabilo + costosFijos + manoDeObra) * safeCapas
+    (costoCera + costoAroma + costoColor + costoPabilo + costosFijos + manoDeObra
+      + redondear2(costoPabiloExtra) + redondear2(costoEsencia) + redondear2(costoCeraExtra)) * safeCapas
   );
 
   return {
@@ -218,6 +259,13 @@ export function calcularVela(params) {
       costosFijos,
       manoDeObra,
       capas: safeCapas,
+      costoPabiloExtra: redondear2(costoPabiloExtra),
+      costoEsencia: redondear2(costoEsencia),
+      costoCeraExtra: redondear2(costoCeraExtra),
+      etiquetaCeraExtra,
+      gramosCeraExtra: safeGramosCeraExtra,
+      cantidadPabilos: safeCantidadPabilos,
+      gramosEsencia: safeGramosEsencia,
     },
     costoBase,
   };
