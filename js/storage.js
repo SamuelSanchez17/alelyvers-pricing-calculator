@@ -114,7 +114,33 @@ export function saveCatalog(catalog) {
  * Si no hay datos, retorna DEFAULT_SETTINGS.
  */
 export function loadSettings() {
-  return getItem('settings') || { ...DEFAULT_SETTINGS };
+  const stored = getItem('settings');
+  if (!stored) return { ...DEFAULT_SETTINGS };
+
+  const merged = {
+    ...DEFAULT_SETTINGS,
+    ...stored,
+    velas: { ...DEFAULT_SETTINGS.velas, ...(stored.velas || {}) },
+  };
+
+  if (stored.materialesVela) {
+    merged.materialesVela = {};
+    for (const [key, defaultVal] of Object.entries(DEFAULT_SETTINGS.materialesVela)) {
+      if (stored.materialesVela[key] !== undefined) {
+        if (typeof defaultVal === 'object' && defaultVal !== null) {
+          merged.materialesVela[key] = { ...defaultVal, ...stored.materialesVela[key] };
+        } else {
+          merged.materialesVela[key] = stored.materialesVela[key];
+        }
+      } else {
+        merged.materialesVela[key] = defaultVal;
+      }
+    }
+  } else {
+    merged.materialesVela = { ...DEFAULT_SETTINGS.materialesVela };
+  }
+
+  return merged;
 }
 
 /**
