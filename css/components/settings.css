@@ -336,6 +336,24 @@
   margin-top: 2px;
 }
 
+.settings-vela-field--readonly {
+  background: var(--bg-surface-alt);
+  opacity: 0.85;
+}
+
+.settings-vela-field__readonly-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-salvia-dark);
+  padding: var(--space-1) 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+[data-theme="dark"] .settings-vela-field__readonly-value {
+  color: var(--color-salvia-light);
+}
+
 /* ════════════════════════════════════════════
    Botones de acción en settings
    ════════════════════════════════════════════ */

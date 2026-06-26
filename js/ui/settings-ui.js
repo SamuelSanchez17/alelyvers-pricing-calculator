@@ -393,6 +393,105 @@ function renderVelasSection() {
   );
 }
 
+// ─── Sección: Materiales de vela ───
+
+function renderMaterialesVelaSection() {
+  const settings = cloneSettings();
+  const mat = settings.materialesVela || {};
+
+  const fields = [
+    {
+      key: 'pabilo.precioPorUnidad',
+      label: mat.pabilo?.nombre || 'Pabilo grueso',
+      unit: 'MXN / pieza',
+      value: mat.pabilo?.precioPorUnidad || 0,
+      step: '0.01',
+    },
+    {
+      key: 'esencia.precioPorGramo',
+      label: mat.esencia?.nombre || 'Esencia aromática',
+      unit: '$/g',
+      value: mat.esencia?.precioPorGramo || 0,
+      step: '0.0001',
+    },
+    {
+      key: 'ceraSoyaAlto.precioPorGramo',
+      label: mat.ceraSoyaAlto?.nombre || 'Cera de soya (alto punto)',
+      unit: '$/g',
+      value: mat.ceraSoyaAlto?.precioPorGramo || 0,
+      step: '0.0001',
+    },
+    {
+      key: 'ceraSoyaBajo.precioPorGramo',
+      label: mat.ceraSoyaBajo?.nombre || 'Cera de soya (bajo punto)',
+      unit: '$/g',
+      value: mat.ceraSoyaBajo?.precioPorGramo || 0,
+      step: '0.0001',
+    },
+    {
+      key: 'parafina.precioPorGramo',
+      label: mat.parafina?.nombre || 'Parafina',
+      unit: '$/g',
+      value: mat.parafina?.precioPorGramo || 0,
+      step: '0.0001',
+    },
+  ];
+
+  const grid = el('div', { className: 'settings-vela-grid' });
+
+  fields.forEach((f) => {
+    const input = el('input', {
+      className: 'settings-vela-field__input',
+      type: 'number',
+      step: f.step,
+      value: f.value,
+      'data-key': f.key,
+    });
+
+    on(input, 'change', () => {
+      const next = cloneSettings();
+      const parts = f.key.split('.');
+      next.materialesVela[parts[0]][parts[1]] = Number(input.value);
+      persistSettings(next);
+    });
+
+    grid.appendChild(
+      el('div', { className: 'settings-vela-field' },
+        el('label', { className: 'settings-vela-field__label' }, f.label),
+        input,
+        el('span', { className: 'settings-vela-field__unit' }, f.unit)
+      )
+    );
+  });
+
+  // Fila de mezcla calculada (solo lectura)
+  const pctCera = mat.mezclaPorcentajeCera ?? 0.70;
+  const precioMezcla =
+    (pctCera * (mat.ceraSoyaAlto?.precioPorGramo || 0)) +
+    ((1 - pctCera) * (mat.parafina?.precioPorGramo || 0));
+
+  const mezclaRow = el('div', { className: 'settings-vela-field settings-vela-field--readonly' },
+    el('label', { className: 'settings-vela-field__label' },
+      `Mezcla (${Math.round(pctCera * 100)}% alto + ${Math.round((1 - pctCera) * 100)}% parafina)`
+    ),
+    el('span', { className: 'settings-vela-field__readonly-value' },
+      `$${precioMezcla.toFixed(4)}/g`
+    ),
+    el('span', { className: 'settings-vela-field__unit' }, 'calculado')
+  );
+
+  grid.appendChild(mezclaRow);
+
+  return el('div', { className: 'settings-section' },
+    el('div', { className: 'settings-section__header' },
+      el('h3', { className: 'settings-section__title' },
+        iconBeaker({ size: 16 }), ' Materiales de vela'
+      )
+    ),
+    grid
+  );
+}
+
 // ─── Sección: Márgenes de canal ───
 
 function renderMargenesSection() {
@@ -562,6 +661,7 @@ export function mountSettings() {
   container.appendChild(renderZonasSection());
   container.appendChild(renderMargenesSection());
   container.appendChild(renderVelasSection());
+  container.appendChild(renderMaterialesVelaSection());
   container.appendChild(renderActions());
 
   return () => {
@@ -583,5 +683,23 @@ function iconDroplet(attrs) {
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', 'M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z');
   el2.appendChild(path);
+  return el2;
+}
+
+function iconBeaker(attrs) {
+  const el2 = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  el2.setAttribute('viewBox', '0 0 24 24');
+  el2.setAttribute('width', attrs.size || 20);
+  el2.setAttribute('height', attrs.size || 20);
+  el2.setAttribute('fill', 'none');
+  el2.setAttribute('stroke', 'currentColor');
+  el2.setAttribute('stroke-width', '2');
+  el2.setAttribute('stroke-linecap', 'round');
+  el2.setAttribute('stroke-linejoin', 'round');
+  ['M8 2v7.246M16 2v7.246', 'M4.57 19.43A2 2 0 0 1 3 17.5V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11.5a2 2 0 0 1-1.57 1.93', 'M2 14h20'].forEach((d) => {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    el2.appendChild(path);
+  });
   return el2;
 }
