@@ -139,9 +139,21 @@ function renderFigureDetails() {
 function updateInputsFromFigure() {
   if (!selectedFigure) return;
   const pesoInput = qs('#candle-peso-cera');
+  if (pesoInput) {
+    pesoInput.value = selectedFigure.peso;
+    recalcAroma();
+  }
+}
+
+function recalcAroma() {
+  const pesoInput = qs('#candle-peso-cera');
   const aromaInput = qs('#candle-peso-aroma');
-  if (pesoInput) pesoInput.value = selectedFigure.peso;
-  if (aromaInput) aromaInput.value = (selectedFigure.peso * 0.08).toFixed(1); // aproximación
+  const percentSelect = qs('#candle-porcentaje-aroma');
+  if (!pesoInput || !aromaInput || !percentSelect) return;
+
+  const pesoCera = Number(pesoInput.value) || 0;
+  const percent = Number(percentSelect.value) || 0.05;
+  aromaInput.value = (pesoCera * percent).toFixed(1);
 }
 
 function renderConfigSummary() {
@@ -181,6 +193,13 @@ function renderNumericFields() {
       })
     ),
     el('div', { className: 'form-group' },
+      el('label', { className: 'form-label', htmlFor: 'candle-porcentaje-aroma' }, '% Aroma'),
+      renderAromaPercentSelect()
+    )
+  );
+
+  const row2 = el('div', { className: 'candle-row' },
+    el('div', { className: 'form-group' },
       el('label', { className: 'form-label', htmlFor: 'candle-peso-aroma' }, 'Peso aroma (g)'),
       el('input', {
         className: 'form-input',
@@ -189,11 +208,11 @@ function renderNumericFields() {
         min: '0',
         step: '0.1',
         placeholder: '0',
-      })
-    )
-  );
-
-  const row2 = el('div', { className: 'candle-row' },
+        readOnly: true,
+        style: { opacity: '0.7', cursor: 'not-allowed' },
+      }),
+      el('span', { className: 'candle-materials__hint' }, 'Calculado automáticamente')
+    ),
     el('div', { className: 'form-group' },
       el('label', { className: 'form-label', htmlFor: 'candle-minutos' }, 'Minutos MO'),
       el('input', {
@@ -205,14 +224,24 @@ function renderNumericFields() {
         placeholder: '30',
         value: '30',
       })
-    ),
+    )
+  );
+
+  const row3 = el('div', { className: 'candle-row' },
     el('div', { className: 'form-group' },
       el('label', { className: 'form-label', htmlFor: 'calc-zona-vela' }, 'Zona'),
       renderZonaSelect()
     )
   );
 
-  return el('div', null, row1, row2);
+  return el('div', null, row1, row2, row3);
+}
+
+function renderAromaPercentSelect() {
+  return el('select', { className: 'form-select', id: 'candle-porcentaje-aroma' },
+    el('option', { value: '0.05' }, '5%'),
+    el('option', { value: '0.10' }, '10%')
+  );
 }
 
 function renderZonaSelect() {
@@ -292,34 +321,20 @@ function renderToggles() {
 
   const settings = store.getState().settings;
   const v = settings.velas || CONFIG_VELAS;
+  const mat = settings.materialesVela || {};
+  const precioPabiloGrueso = mat.pabiloGrueso?.precioPorUnidad || 1.00;
 
   return el('div', null,
     makeToggle('Color', 'Tinte para la cera', v.costoColorFijo || 0.50, 'color', true),
-    makeToggle('Pabilo', 'Mecha para vela', v.costoPabiloFijo || 1.00, 'pabilo', true),
-    makeToggle('Decorado extra', '+5 min de trabajo', 0, 'decorado', false),
+    makeToggle('Pabilo normal', 'Mecha para vela', v.costoPabiloFijo || 0.80, 'pabilo', true),
+    makeToggle('Pabilo grueso', 'Mecha gruesa para vela', precioPabiloGrueso, 'pabilo-grueso', false),
+    makeToggle('Decorado extra', '+5 min de trabajo', 5.00, 'decorado', false),
   );
 }
 
 function renderMaterialesAdicionales() {
   const settings = store.getState().settings;
   const mat = settings.materialesVela || {};
-
-  // Pabilos
-  const pabiloField = el('div', { className: 'form-group' },
-    el('label', { className: 'form-label', htmlFor: 'candle-cantidad-pabilos' }, 'Pabilos gruesos'),
-    el('input', {
-      className: 'form-input',
-      type: 'number',
-      id: 'candle-cantidad-pabilos',
-      min: '0',
-      step: '1',
-      value: '0',
-      placeholder: '0',
-    }),
-    el('span', { className: 'candle-materials__hint' },
-      `${formatMXN(mat.pabilo?.precioPorUnidad || 0)} / pieza`
-    )
-  );
 
   // Esencia
   const esenciaField = el('div', { className: 'form-group' },
@@ -386,7 +401,6 @@ function renderMaterialesAdicionales() {
   ceraGramosField.querySelector('input').disabled = true;
 
   return el('div', { className: 'candle-materials-section' },
-    pabiloField,
     esenciaField,
     ceraTypeField,
     ceraGramosField
@@ -424,9 +438,9 @@ function collectParams() {
   const capas = Number(qs('#candle-capas-value')?.textContent) || 1;
   const conColor = qs('#candle-color')?.checked ?? true;
   const conPabilo = qs('#candle-pabilo')?.checked ?? true;
+  const conPabiloGrueso = qs('#candle-pabilo-grueso')?.checked ?? false;
   const conDecorado = qs('#candle-decorado')?.checked ?? false;
 
-  const cantidadPabilos = Number(qs('#candle-cantidad-pabilos')?.value) || 0;
   const gramosEsencia = Number(qs('#candle-gramos-esencia')?.value) || 0;
   const tipoCeraExtra = qs('#candle-tipo-cera-extra')?.value || null;
   const gramosCeraExtra = Number(qs('#candle-gramos-cera-extra')?.value) || 0;
@@ -444,6 +458,7 @@ function collectParams() {
     capas,
     conColor,
     conPabilo,
+    conPabiloGrueso,
     conDecorado,
     margen,
     recargoUrgencia: 0,
@@ -453,7 +468,6 @@ function collectParams() {
     zona: zonaKey,
     tipoCeraExtra,
     gramosCeraExtra,
-    cantidadPabilos,
     gramosEsencia,
     materialesVela: mat,
   };
@@ -520,13 +534,11 @@ function handleCalculate() {
     ['Aroma', result.desglose.costoAroma],
   ];
   if (result.desglose.costoColor > 0) items.push(['Color', result.desglose.costoColor]);
-  if (result.desglose.costoPabilo > 0) items.push(['Pabilo', result.desglose.costoPabilo]);
+  if (result.desglose.costoPabilo > 0) items.push(['Pabilo normal', result.desglose.costoPabilo]);
+  if (result.desglose.costoPabiloGrueso > 0) items.push(['Pabilo grueso', result.desglose.costoPabiloGrueso]);
   items.push(['Costos fijos', result.desglose.costosFijos]);
   items.push(['Mano de obra', result.desglose.manoDeObra]);
 
-  if (result.desglose.cantidadPabilos > 0) {
-    items.push([`Pabilos extra (×${result.desglose.cantidadPabilos})`, result.desglose.costoPabiloExtra]);
-  }
   if (result.desglose.gramosEsencia > 0) {
     items.push([`Esencia (${result.desglose.gramosEsencia}g)`, result.desglose.costoEsencia]);
   }
@@ -740,6 +752,18 @@ export function mountCandles() {
 
   const submitBtn = qs('#candle-submit-btn');
   on(submitBtn, 'click', handleCalculate);
+
+  // Auto-calcular peso aroma al cambiar peso cera o porcentaje
+  const pesoCeraInput = qs('#candle-peso-cera');
+  const aromaPercentSelect = qs('#candle-porcentaje-aroma');
+  if (pesoCeraInput) {
+    on(pesoCeraInput, 'input', recalcAroma);
+    on(pesoCeraInput, 'change', recalcAroma);
+  }
+  if (aromaPercentSelect) {
+    on(aromaPercentSelect, 'change', recalcAroma);
+    on(aromaPercentSelect, 'input', recalcAroma);
+  }
 
   const unsubscribe = store.subscribe(() => {
     // Re-renderizar summary de config si cambian settings

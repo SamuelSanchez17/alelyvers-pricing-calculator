@@ -171,12 +171,12 @@ export function calcularPiezaCompleta(params) {
  * @param {number} params.tarifaPorMinuto  — $/min de la zona
  * @param {number} [params.capas=1]        — si tiene múltiples capas, multiplica costo
  * @param {boolean} [params.conColor=true] — costo fijo $0.50
- * @param {boolean} [params.conPabilo=true]— costo fijo $1.00
+ * @param {boolean} [params.conPabilo=true]  — costo fijo $0.80
+ * @param {boolean} [params.conPabiloGrueso=false] — costo $1.00
  * @param {boolean} [params.conDecorado=false] — +5 min extra si lleva decorado
  * @param {Object} [params.config]         — overrides de CONFIG_VELAS
  * @param {string}  [params.tipoCeraExtra=null] — 'soya-alto' | 'soya-bajo' | 'parafina' | 'mezcla'
  * @param {number}  [params.gramosCeraExtra=0]  — gramos de cera adicional
- * @param {number}  [params.cantidadPabilos=0]  — cantidad de pabilos extra
  * @param {number}  [params.gramosEsencia=0]    — gramos de esencia aromática extra
  * @param {Object}  [params.materialesVela]     — configuración de materiales de vela (de settings)
  * @returns {{ desglose: Object, costoBase: number }}
@@ -190,11 +190,11 @@ export function calcularVela(params) {
     capas = 1,
     conColor = true,
     conPabilo = true,
+    conPabiloGrueso = false,
     conDecorado = false,
     config = {},
     tipoCeraExtra = null,
     gramosCeraExtra = 0,
-    cantidadPabilos = 0,
     gramosEsencia = 0,
     materialesVela = {},
   } = params;
@@ -207,20 +207,18 @@ export function calcularVela(params) {
   const safeTarifa = Math.max(0, Number(tarifaPorMinuto) || 0);
   const safeCapas = Math.max(1, Number(capas) || 1);
   const safeGramosCeraExtra = Math.max(0, Number(gramosCeraExtra) || 0);
-  const safeCantidadPabilos = Math.max(0, Number(cantidadPabilos) || 0);
   const safeGramosEsencia = Math.max(0, Number(gramosEsencia) || 0);
 
   const costoCera     = redondear2(safePesoCera * cfg.precioCeraPorGramo);
   const costoAroma    = redondear2(safePesoAroma * cfg.precioAromaPorGramo);
   const costoColor    = conColor ? cfg.costoColorFijo : 0;
   const costoPabilo   = conPabilo ? cfg.costoPabiloFijo : 0;
+  const costoPabiloGrueso = conPabiloGrueso ? (materialesVela.pabiloGrueso?.precioPorUnidad || 1.00) : 0;
   const costosFijos   = cfg.costoFijo;
   const minutosTotal  = safeMinutos + (conDecorado ? cfg.extraDecorarMinutos : 0);
   const manoDeObra    = redondear2(minutosTotal * safeTarifa);
 
   // Materiales adicionales
-  const costoPabiloExtra = safeCantidadPabilos * (materialesVela.pabilo?.precioPorUnidad || 0);
-
   const costoEsencia = safeGramosEsencia * (materialesVela.esencia?.precioPorGramo || 0);
 
   let costoCeraExtra = 0;
@@ -246,8 +244,8 @@ export function calcularVela(params) {
   }
 
   const costoBase = redondear2(
-    (costoCera + costoAroma + costoColor + costoPabilo + costosFijos + manoDeObra
-      + redondear2(costoPabiloExtra) + redondear2(costoEsencia) + redondear2(costoCeraExtra)) * safeCapas
+    (costoCera + costoAroma + costoColor + costoPabilo + costoPabiloGrueso + costosFijos + manoDeObra
+      + redondear2(costoEsencia) + redondear2(costoCeraExtra)) * safeCapas
   );
 
   return {
@@ -256,15 +254,14 @@ export function calcularVela(params) {
       costoAroma,
       costoColor,
       costoPabilo,
+      costoPabiloGrueso,
       costosFijos,
       manoDeObra,
       capas: safeCapas,
-      costoPabiloExtra: redondear2(costoPabiloExtra),
       costoEsencia: redondear2(costoEsencia),
       costoCeraExtra: redondear2(costoCeraExtra),
       etiquetaCeraExtra,
       gramosCeraExtra: safeGramosCeraExtra,
-      cantidadPabilos: safeCantidadPabilos,
       gramosEsencia: safeGramosEsencia,
     },
     costoBase,
