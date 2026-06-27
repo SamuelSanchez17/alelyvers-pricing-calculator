@@ -123,6 +123,15 @@ export function loadSettings() {
     velas: { ...DEFAULT_SETTINGS.velas, ...(stored.velas || {}) },
   };
 
+  let needsSave = false;
+
+  // Migración: pabilo normal $0.80 (antes $1.00)
+  if (merged.velas && merged.velas.costoPabiloFijo === 1.00) {
+    merged.velas.costoPabiloFijo = 0.80;
+    needsSave = true;
+  }
+
+  // Migración: renombrar materialesVela.pabilo → pabiloGrueso
   if (stored.materialesVela) {
     merged.materialesVela = {};
     for (const [key, defaultVal] of Object.entries(DEFAULT_SETTINGS.materialesVela)) {
@@ -136,8 +145,22 @@ export function loadSettings() {
         merged.materialesVela[key] = defaultVal;
       }
     }
+    // Si existe el viejo "pabilo", migrar a "pabiloGrueso"
+    if (stored.materialesVela.pabilo && !stored.materialesVela.pabiloGrueso) {
+      merged.materialesVela.pabiloGrueso = {
+        ...DEFAULT_SETTINGS.materialesVela.pabiloGrueso,
+        ...stored.materialesVela.pabilo,
+      };
+      delete merged.materialesVela.pabilo;
+      needsSave = true;
+    }
   } else {
     merged.materialesVela = { ...DEFAULT_SETTINGS.materialesVela };
+  }
+
+  // Persistir migraciones para siguientes cargas
+  if (needsSave) {
+    setItem('settings', merged);
   }
 
   return merged;

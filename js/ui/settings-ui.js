@@ -401,10 +401,10 @@ function renderMaterialesVelaSection() {
 
   const fields = [
     {
-      key: 'pabilo.precioPorUnidad',
-      label: mat.pabilo?.nombre || 'Pabilo grueso',
+      key: 'pabiloGrueso.precioPorUnidad',
+      label: mat.pabiloGrueso?.nombre || 'Pabilo grueso',
       unit: 'MXN / pieza',
-      value: mat.pabilo?.precioPorUnidad || 0,
+      value: mat.pabiloGrueso?.precioPorUnidad || 0,
       step: '0.01',
     },
     {

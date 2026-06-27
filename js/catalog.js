@@ -157,12 +157,12 @@ export const DEFAULT_SETTINGS = {
     precioCeraPorGramo:  0.1215,
     precioAromaPorGramo: 0.08,
     costoColorFijo:      0.50,
-    costoPabiloFijo:     1.00,
+    costoPabiloFijo:     0.80,
     costoFijo:           5.00,
     extraDecorarMinutos: 5,
   },
   materialesVela: {
-    pabilo: {
+    pabiloGrueso: {
       nombre: 'Pabilo grueso',
       precioPorUnidad: 1.00,
       unidad: 'pieza',
